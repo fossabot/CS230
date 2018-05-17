@@ -1,2 +1,6 @@
-patient_1_interictal_segment_0001.csv
-Patient_1_interictal_segment_0001.mat
+Seqtest.npy
+Seqtrain.npy
+Xtest.npy
+Xtrain.npy
+Ytest.npy
+Ytrain.npy
