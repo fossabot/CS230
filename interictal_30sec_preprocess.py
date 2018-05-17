@@ -30,9 +30,9 @@ for i in range(1, numDogs+1):
     tempPreictalNum = preictalNum['Dog' + str(i)]
     for j in range(1, tempPreictalNum + 1):
         print j
-        inFileName = 'Dog_' + str(i) + '\Dog_' + str(i) + '_preictal_segment_' + str(j).zfill(4) + '.mat'
+        inFileName = 'Dog_' + str(i) + '\Dog_' + str(i) + '_interictal_segment_' + str(j).zfill(4) + '.mat'
         matData = scipy.io.loadmat(inFileName, struct_as_record = False, squeeze_me = True)
-        tempStr = 'preictal_segment_' + str(j)
+        tempStr = 'interictal_segment_' + str(j)
         if (matData[tempStr].sequence == numSlicesOriginal): #last 10 minutes
             dog = i
             samplingRate = matData[tempStr].sampling_frequency
@@ -43,8 +43,8 @@ for i in range(1, numDogs+1):
                 endInd = (k+1)*splitSize
                 #endInd = (None if (k == (splitRatio - 1)) else ((k+1)*splitSize))
                 dataArray = matData[tempStr].data[:, startInd:endInd]
-                instance = NeuralData('preictal', dog, trial, sequenceNum, samplingRate, dataArray)
-                outFileName = 'TrainingData\preictal_' + str(totalPositiveExamples) + '.pkl'
+                instance = NeuralData('interictal', dog, trial, sequenceNum, samplingRate, dataArray)
+                outFileName = 'TrainingData\interictal_' + str(totalPositiveExamples) + '.pkl'
                 with open(outFileName, 'wb') as output:
                     pickle.dump(instance, output, pickle.HIGHEST_PROTOCOL)
                 del instance
