@@ -1,54 +1,39 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.framework import ops
-from cnn_utils import *
+# from cnn_utils import *
 
 np.random.seed(1)
 
-class NeuralData:
-    def __init__(self, dataType, dog, trial, sequenceNum, samplingRate, dataArray):
-        self.dataType = dataType #preictal or interictal
-        self.dog = dog
-        self.trial = trial
-        self.sequenceNum = sequenceNum
-        self.samplingRate = samplingRate
-        self.dataArray = dataArray
-
-
 def load_dataset():
-	X_train = np.load('Xtrain.npy')
-	Y_train = np.load('Ytrain.npy')
-	Seq_train = np.load('Seqtrain.npy')
-	X_test = np.load('Xtest.npy')
-	Y_test = np.load('Ytest.npy')
-	Seq_test = np.load('Seqtest.npy')
-	return X_train, Y_train, Seq_train, X_test, Y_test, Seq_test
+    print("here1")
+    X_train = np.load('Xtrain.npy')
+    print("here2")
+    Y_train = np.load('Ytrain.npy')
+    Seq_train = np.load('Seqtrain.npy')
+    X_test = np.load('Xtest.npy')
+    Y_test = np.load('Ytest.npy')
+    Seq_test = np.load('Seqtest.npy')
+    return X_train, Y_train, Seq_train, X_test, Y_test, Seq_test
 
-X_train, Y_train, Seq_train, X_test, Y_test, Seq_test= load_dataset()
-
-
-def create_placeholders(n_H0, n_W0, n_C0, n_y):
+def create_placeholders(n_H0, n_W0, n_y):
     """
     Creates the placeholders for the tensorflow session.
 
     Arguments:
     n_H0 -- scalar, height of an input image
     n_W0 -- scalar, width of an input image
-    n_C0 -- scalar, number of channels of the input
     n_y -- scalar, number of classes
 
     Returns:
-    X -- placeholder for the data input, of shape [None, n_H0, n_W0, n_C0] and dtype "float"
+    X -- placeholder for the data input, of shape [None, n_H0, n_W0] and dtype "float"
     Y -- placeholder for the input labels, of shape [None, n_y] and dtype "float"
     """
 
-    X =  tf.placeholder(tf.float32, shape=(None,n_H0,n_W0,n_C0))
+    X =  tf.placeholder(tf.float32, shape=(None,n_H0,n_W0))
     Y =  tf.placeholder(tf.float32, shape=(None,n_y))
-    Seq =  tf.placeholder(tf.float32, shape=(None,n_y))
 
-    return X, Y, Seq
-
-X, Y, Seq = create_placeholders(16, 12000, 1, 1)
+    return X, Y
 
 def initialize_parameters():
     """
@@ -70,7 +55,7 @@ def initialize_parameters():
 
     return parameters
 
-def forward_propagation(X, parameters, Seq):
+def forward_propagation(X, parameters):
     """
     Implements the forward propagation for the model:
     CONV2D ->  FLATTEN -> add SEQ data -> 3x FULLYCONNECTED
@@ -90,7 +75,7 @@ def forward_propagation(X, parameters, Seq):
 
     ### START CODE HERE ###
     # CONV2D: stride of 1, padding 'SAME'
-    Z1 = tf.nn.conv2d(X,W1, strides = [1,10,1,1], padding = 'VALID')
+    Z1 = tf.nn.conv2d(X,W1, strides = [1,10,1], padding = 'VALID')
     # RELU
     A1 = tf.nn.relu(Z1)
     # MAXPOOL: window 8x8, sride 8, padding 'SAME'
@@ -103,7 +88,7 @@ def forward_propagation(X, parameters, Seq):
     #P2 = tf.nn.max_pool(A2, ksize = [1,4,4,1], strides = [1,4,4,1], padding = 'SAME')
     # FLATTEN
     A1 = tf.contrib.layers.flatten(A1)
-    A1 = tf.concat([Z1,tf.transpose(Seq)],0)
+    #A1 = tf.concat([Z1,tf.transpose(Seq)],0)
     # FULLY-CONNECTED without non-linear activation function (not not call softmax).
     # 6 neurons in output layer. Hint: one of the arguments should be "activation_fn=None"
     Z2 = tf.contrib.layers.fully_connected(A1, 100, activation_fn=relu)
@@ -139,9 +124,9 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.009,
     CONV2D ->  FLATTEN -> add SEQ data -> 3x FULLYCONNECTED
 
     Arguments:
-    X_train -- training set, of shape (None, 16, 12000, 1)
+    X_train -- training set, of shape (None, 16, 11988, 1)
     Y_train -- test set, of shape (None, n_y = 1)
-    X_test -- training set, of shape (None, 16,12000, 1)
+    X_test -- training set, of shape (None, 16, 11988, 1)
     Y_test -- test set, of shape (None, n_y = 1)
     learning_rate -- learning rate of the optimization
     num_epochs -- number of epochs of the optimization loop
@@ -157,13 +142,13 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.009,
     ops.reset_default_graph()                         # to be able to rerun the model without overwriting tf variables
     tf.set_random_seed(1)                             # to keep results consistent (tensorflow seed)
     seed = 3                                          # to keep results consistent (numpy seed)
-    (m, n_H0, n_W0, n_C0) = X_train.shape
+    (m, n_H0, n_W0) = X_train.shape
     n_y = Y_train.shape[1]
     costs = []                                        # To keep track of the cost
 
     # Create Placeholders of the correct shape
     ### START CODE HERE ### (1 line)
-    X, Y, Seq = create_placeholders(n_H0, n_W0, n_C0, n_y)
+    X, Y = create_placeholders(n_H0, n_W0, n_y)
     ### END CODE HERE ###
 
     # Initialize parameters
@@ -171,9 +156,11 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.009,
     parameters = initialize_parameters()
     ### END CODE HERE ###
 
+    print("here3")
+
     # Forward propagation: Build the forward propagation in the tensorflow graph
     ### START CODE HERE ### (1 line)
-    Z4 = forward_propagation(X, parameters, Seq)
+    Z4 = forward_propagation(X, parameters)
     ### END CODE HERE ###
 
     # Cost function: Add cost function to tensorflow graph
@@ -188,6 +175,8 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.009,
 
     # Initialize all the variables globally
     init = tf.global_variables_initializer()
+
+    print("here4")
 
     # Start the session to compute the tensorflow graph
     with tf.Session() as sess:
@@ -240,9 +229,12 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.009,
         # Calculate accuracy on the test set
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
         print(accuracy)
-        train_accuracy = accuracy.eval({X: X_train, Y: Y_train, Seq: Seq_train})
-        test_accuracy = accuracy.eval({X: X_test, Y: Y_test, Seq: Seq_test})
+        train_accuracy = accuracy.eval({X: X_train, Y: Y_train})
+        test_accuracy = accuracy.eval({X: X_test, Y: Y_test})
         print("Train Accuracy:", train_accuracy)
         print("Test Accuracy:", test_accuracy)
 
         return train_accuracy, test_accuracy, parameters
+
+X_train, Y_train, Seq_train, X_test, Y_test, Seq_test = load_dataset()
+_, _, parameters = model(X_train, Y_train, X_test, Y_test)
