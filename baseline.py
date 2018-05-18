@@ -64,15 +64,17 @@ def forward_propagation(X, parameters):
     W1 = parameters['W1']
 
     # CONV2D: stride of 10 in one dimension, padding 'valid'
-    Z1 = tf.nn.conv2d(X,W1, strides = [1,10,1,1], padding = 'VALID')
+    Z1 = tf.nn.conv2d(X,W1, strides = [1,1,10,1], padding = 'VALID')
+
     # RELU
-    A1 = tf.nn.relu(Z1)
+    #A1 = tf.nn.relu(Z1)
+    print Z1.shape
     # FLATTEN
-    A1 = tf.contrib.layers.flatten(A1)
+    Z1 = tf.contrib.layers.flatten(Z1)
     #A1 = tf.concat([Z1,tf.transpose(Seq)],0)
     # FULLY-CONNECTED layers
     # 6 neurons in output layer. Hint: one of the arguments should be "activation_fn=None"
-    A2 = tf.contrib.layers.fully_connected(A1, 100)
+    A2 = tf.contrib.layers.fully_connected(Z1, 100)
     A3 = tf.contrib.layers.fully_connected(A2, 20)
     Z4 = tf.contrib.layers.fully_connected(A3, 1, activation_fn=None)
 
@@ -162,8 +164,9 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.009,
     n_y = Y_train.shape[1]
 
     (m1, _, _) = X_test.shape
+
     X_test = X_test.reshape(m1, n_H0, n_W0, 1)
-    costs = []                                        # To keep track of the cost
+    costs = []
 
     # Create Placeholders of the correct shape
     X, Y = create_placeholders(n_H0, n_W0, n_y, 1)
@@ -201,6 +204,7 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.009,
 
                 # Select a minibatch
                 (minibatch_X, minibatch_Y) = minibatch
+
                 # IMPORTANT: The line that runs the graph on a minibatch.
                 # Run the session to execute the optimizer and the cost, the feedict should contain a minibatch for (X,Y).
                 _ , temp_cost = sess.run([optimizer, cost], feed_dict={X: minibatch_X, Y: minibatch_Y})
@@ -220,16 +224,29 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.009,
         # comp = tf.Variable(tf.fill(dims=tf.shape(Z4), 0.5), validate_shape=False)
         # predict_op = tf.greater(Z4, comp)
         # correct_prediction = tf.equal(tf.cast(predict_op, dtype = tf.float32), Y)
-        correct_prediction = tf.round(tf.squeeze(Z4))
+        A4 = tf.sigmoid(Z4)
+        predict_op = tf.greater(A4,0.5)
+        correct_prediction = tf.equal(predict_op, tf.equal(Y,1.0))
+        # Calculate accuracy
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, 'float'))
+
+
 
         # Calculate accuracy on the test set
-        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         print("here1")
+        
         train_accuracy = accuracy.eval({X: X_train, Y: Y_train})
+
+        #train_accuracy = tf.reduce_mean(correct_prediction)
         print("here2")
         test_accuracy = accuracy.eval({X: X_test, Y: Y_test})
+        
+        print(correct_prediction.eval({X: X_test, Y: Y_test}))
+        print(predict_op.eval({X: X_test, Y: Y_test}))
+        print(A4.eval({X: X_test, Y: Y_test}))
         print("here3")
         print("Train Accuracy:", train_accuracy)
+        tf.Print(accuracy,[accuracy])
         print("Test Accuracy:", test_accuracy)
         print("Parameters:", parameters)
 
