@@ -6,10 +6,8 @@ from tensorflow.python.framework import ops
 def load_dataset():
     X_train = np.load('Xtrain.npy')
     Y_train = np.load('Ytrain.npy')
-    #Seq_train = np.load('Seqtrain.npy')
     X_test = np.load('Xtest.npy')
     Y_test = np.load('Ytest.npy')
-    #Seq_test = np.load('Seqtest.npy')
     return X_train, Y_train, X_test, Y_test
 
 def create_placeholders(n_H0, n_W0, n_y, n_C):
@@ -34,8 +32,6 @@ def create_placeholders(n_H0, n_W0, n_y, n_C):
 def initialize_parameters():
     """
     Initializes weight parameters to build a neural network with tensorflow. The shapes are:
-                        W1 : [4, 4, 3, 8]
-                        W2 : [2, 2, 8, 16]
     Returns:
     parameters -- a dictionary of tensors containing W1, W2
     """
@@ -49,7 +45,7 @@ def initialize_parameters():
 def forward_propagation(X, parameters):
     """
     Implements the forward propagation for the model:
-    CONV2D ->  FLATTEN -> add SEQ data -> 3x FULLYCONNECTED
+    CONV2D -> RELU -> FLATTEN -> 4x FULLYCONNECTED
 
     Arguments:
     X -- input dataset placeholder, of shape (input size, number of examples)
@@ -67,35 +63,34 @@ def forward_propagation(X, parameters):
     Z1 = tf.nn.conv2d(X,W1, strides = [1,1,10,1], padding = 'VALID')
 
     # RELU
-    #A1 = tf.nn.relu(Z1)
-    print Z1.shape
+    A1 = tf.nn.relu(Z1)
     # FLATTEN
     Z1 = tf.contrib.layers.flatten(Z1)
-    #A1 = tf.concat([Z1,tf.transpose(Seq)],0)
     # FULLY-CONNECTED layers
-    # 6 neurons in output layer. Hint: one of the arguments should be "activation_fn=None"
-    A2 = tf.contrib.layers.fully_connected(Z1, 100)
-    A3 = tf.contrib.layers.fully_connected(A2, 20)
-    Z4 = tf.contrib.layers.fully_connected(A3, 1, activation_fn=None)
+    A2 = tf.contrib.layers.fully_connected(Z1, 500)
+    A3 = tf.contrib.layers.fully_connected(A2, 500)
+    A4 = tf.contrib.layers.fully_connected(A3, 100)
+    A5 = tf.contrib.layers.fully_connected(A4, 20)
+    Z5 = tf.contrib.layers.fully_connected(A5, 1, activation_fn=None)
 
-    return Z4
+    return Z5
 
-def compute_cost(Z4, Y):
+def compute_cost(Z5, Y):
     """
     Computes the cost
 
     Arguments:
-    Z3 -- output of forward propagation (output of the last LINEAR unit), of shape (6, number of examples)
+    Z3 -- output of forward propagation (output of the last LINEAR unit), of shape (number of examples,1)
     Y -- "true" labels vector placeholder, same shape as Z3
 
     Returns:
     cost - Tensor of the cost function
     """
 
-    cost = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits = Z4, labels = Y))
+    cost = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits = Z5, labels = Y))
     return cost
 
-def random_mini_batches(X, Y, mini_batch_size = 64, seed = 0):
+def random_mini_batches(X, Y, mini_batch_size = 64, seed = 3):
     """
     Creates a list of random minibatches from (X, Y)
 
@@ -134,8 +129,9 @@ def random_mini_batches(X, Y, mini_batch_size = 64, seed = 0):
         mini_batches.append(mini_batch)
 
     return mini_batches
-def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.009,
-          num_epochs = 1, minibatch_size = 64, print_cost = True):
+
+def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.01,
+          num_epochs = 8, minibatch_size = 64, print_cost = True):
     """
     Implements a three-layer ConvNet in Tensorflow:
     CONV2D ->  FLATTEN -> add SEQ data -> 3x FULLYCONNECTED
@@ -157,8 +153,8 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.009,
     """
 
     ops.reset_default_graph()                         # to be able to rerun the model without overwriting tf variables
-    tf.set_random_seed(1)                             # to keep results consistent (tensorflow seed)
-    seed = 3                                          # to keep results consistent (numpy seed)
+    tf.set_random_seed(2)                             # to keep results consistent (tensorflow seed)
+    seed = 10                                          # to keep results consistent (numpy seed)
     (m, n_H0, n_W0) = X_train.shape
     X_train = X_train.reshape(m,n_H0,n_W0,1)
     n_y = Y_train.shape[1]
@@ -175,10 +171,10 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.009,
     parameters = initialize_parameters()
 
     # Forward propagation: Build the forward propagation in the tensorflow graph
-    Z4 = forward_propagation(X, parameters)
+    Z5 = forward_propagation(X, parameters)
 
     # Cost function: Add cost function to tensorflow graph
-    cost = compute_cost(Z4,Y)
+    cost = compute_cost(Z5,Y)
 
     # Backpropagation: Define the tensorflow optimizer. Use an AdamOptimizer that minimizes the cost.
     optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate).minimize(cost)
@@ -213,44 +209,25 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.009,
             # Print the cost every epoch
             if print_cost == True and epoch % 1 == 0:
                 print ("Cost after epoch %i: %f" % (epoch, minibatch_cost))
-            if print_cost == True and epoch % 1 == 0:
                 costs.append(minibatch_cost)
-
+            
         # Calculate the correct predictions
-        # def fn_true(): return tf.constant(1, dtype = tf.float32)
-        # def fn_false(): return tf.constant(0, dtype = tf.float32)
-        # predict_op = tf.cond(tf.greater(tf.squeeze(Z4), tf.constant(0.5)), true_fn = fn_true, false_fn = fn_false)
-        # Z4 = tf.squeeze(Z4)
-        # comp = tf.Variable(tf.fill(dims=tf.shape(Z4), 0.5), validate_shape=False)
-        # predict_op = tf.greater(Z4, comp)
-        # correct_prediction = tf.equal(tf.cast(predict_op, dtype = tf.float32), Y)
-        A4 = tf.sigmoid(Z4)
-        predict_op = tf.greater(A4,0.5)
+        A5 = tf.sigmoid(Z5)
+        predict_op = tf.greater(A5,0.5)
         correct_prediction = tf.equal(predict_op, tf.equal(Y,1.0))
         # Calculate accuracy
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, 'float'))
 
-
-
         # Calculate accuracy on the test set
-        print("here1")
         
         train_accuracy = accuracy.eval({X: X_train, Y: Y_train})
-
-        #train_accuracy = tf.reduce_mean(correct_prediction)
-        print("here2")
         test_accuracy = accuracy.eval({X: X_test, Y: Y_test})
         
-        print(correct_prediction.eval({X: X_test, Y: Y_test}))
-        print(predict_op.eval({X: X_test, Y: Y_test}))
-        print(A4.eval({X: X_test, Y: Y_test}))
-        print("here3")
         print("Train Accuracy:", train_accuracy)
-        tf.Print(accuracy,[accuracy])
         print("Test Accuracy:", test_accuracy)
-        print("Parameters:", parameters)
-
         return train_accuracy, test_accuracy, parameters
+
+        
 
 X_train, Y_train, X_test, Y_test = load_dataset()
 _, _, parameters = model(X_train, Y_train, X_test, Y_test)
