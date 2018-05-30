@@ -35,12 +35,12 @@ def model(input_shape):
     X = Dropout(0.8)(X)                                 # dropout (use 0.8)
 
     # Step 2: First GRU Layer (≈4 lines)
-    X = GRU(units = 128, return_sequences = True)(X)                            # GRU (use 128 units and return the sequences)
+    X = LSTM(units = 128, return_sequences = True)(X)                            # GRU (use 128 units and return the sequences)
     X = Dropout(0.8)(X)                               # dropout (use 0.8)
     X = BatchNormalization()(X)                                 # Batch normalization
     
     # Step 3: Second GRU Layer (≈4 lines)
-    X = GRU(units = 128, return_sequences = False)(X)                       # GRU (use 128 units and return the sequences)
+    X = LSTM(units = 128, return_sequences = False)(X)                       # GRU (use 128 units and return the sequences)
     X = Dropout(0.8)(X)                    # dropout (use 0.8)
     X = BatchNormalization()(X)                                 # Batch normalization
     X = Dropout(0.8)(X)                                 # dropout (use 0.8)
@@ -67,6 +67,7 @@ opt = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, decay=0.01)
 model.compile(loss='binary_crossentropy', optimizer=opt, metrics=["accuracy"])
 
 model.fit(X_train, Y_train, batch_size = 5, epochs=3)
+m,n_h,n_w=X_test.shape
 X_test = X_test.reshape(m,n_w,n_h)
 loss, acc = model.evaluate(X_test, Y_test)
 print ("Dev set loss = ", loss)
