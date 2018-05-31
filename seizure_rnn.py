@@ -55,10 +55,17 @@ def model(input_shape):
     return model  
 
 X_train, Y_train, X_test, Y_test = load_dataset()
+
 print X_train[1]
 m,n_h,n_w=X_train.shape
 X_train = X_train.reshape(m,n_w,n_h)
-print X_train.shape
+
+permutation = list(np.random.permutation(m))
+X_train = X_train[permutation,:]
+Y_train = Y_train[permutation,:]
+X_train = X_train[0:10,:]
+Y_train = Y_train[0:10,:]
+print Y_train
 print X_train[1].shape
 #X_train = X_train[0:10].reshape(10,n_w,n_h)
 #Y_train = Y_train[0:10].reshape(10,1)
@@ -69,7 +76,7 @@ model.summary()
 opt = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, decay=0.01)
 model.compile(loss='binary_crossentropy', optimizer=opt, metrics=["accuracy"])
 
-model.fit(X_train, Y_train, batch_size = 5, epochs=3)
+model.fit(X_train, Y_train, batch_size = 5, epochs=15)
 m,n_h,n_w=X_test.shape
 X_test = X_test.reshape(m,n_w,n_h)
 loss, acc = model.evaluate(X_test, Y_test)
