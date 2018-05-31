@@ -30,20 +30,20 @@ def model(input_shape):
     X_input = Input(shape = input_shape)
     # Step 1: CONV layer (≈4 lines)
     X = Conv1D(1,16,strides =10)(X_input)                               # CONV1D
-    X = BatchNormalization()(X)                          # Batch normalization
+    #X = BatchNormalization()(X)                          # Batch normalization
     X = Activation('relu')(X)                                 # ReLu activation
-    X = Dropout(0.8)(X)                                 # dropout (use 0.8)
+    #X = Dropout(0.8)(X)                                 # dropout (use 0.8)
 
     # Step 2: First GRU Layer (≈4 lines)
     X = LSTM(units = 128, return_sequences = True)(X)                            # GRU (use 128 units and return the sequences)
-    X = Dropout(0.8)(X)                               # dropout (use 0.8)
-    X = BatchNormalization()(X)                                 # Batch normalization
+    #X = Dropout(0.8)(X)                               # dropout (use 0.8)
+    #X = BatchNormalization()(X)                                 # Batch normalization
     
     # Step 3: Second GRU Layer (≈4 lines)
     X = LSTM(units = 128, return_sequences = False)(X)                       # GRU (use 128 units and return the sequences)
-    X = Dropout(0.8)(X)                    # dropout (use 0.8)
-    X = BatchNormalization()(X)                                 # Batch normalization
-    X = Dropout(0.8)(X)                                 # dropout (use 0.8)
+    #X = Dropout(0.8)(X)                    # dropout (use 0.8)
+    #X = BatchNormalization()(X)                                 # Batch normalization
+    #X = Dropout(0.8)(X)                                 # dropout (use 0.8)
     
     # Step 4: Time-distributed dense layer (≈1 line)
     X = Dense(1, activation = "sigmoid")(X) # time distributed  (sigmoid)
@@ -60,6 +60,9 @@ m,n_h,n_w=X_train.shape
 X_train = X_train.reshape(m,n_w,n_h)
 print X_train.shape
 print X_train[1].shape
+#X_train = X_train[0:10].reshape(10,n_w,n_h)
+#Y_train = Y_train[0:10].reshape(10,1)
+#print Y_train
 model = model(input_shape = X_train[0].shape)
 
 model.summary()
