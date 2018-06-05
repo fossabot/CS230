@@ -10,11 +10,9 @@ from keras.optimizers import Adam
     ### END CODE HERE ##
 
 def load_dataset():
-    X_train = np.load('Xtrain4.npy')
-    X_train = np.fft(X_train, axis = 1) #along numSamples axis
+    X_train = np.load('Xtrain4_fft.npy')
     Y_train = np.load('Ytrain4.npy')
-    X_test = np.load('Xtest4.npy')
-    X_test = np.fft(X_test, axis = 1)
+    X_test = np.load('Xtest4_fft.npy')
     Y_test = np.load('Ytest4.npy')
     return X_train, Y_train, X_test, Y_test
 
@@ -59,23 +57,20 @@ def model(input_shape):
 
 X_train, Y_train, X_test, Y_test = load_dataset()
 
-print(X_train)
+print(X_train.shape)
 m,n_h,n_w=X_train.shape
 
 permutation = list(np.random.permutation(m))
 X_train = X_train[permutation,:]
 Y_train = Y_train[permutation,:]
 print(Y_train)
-print(X_train[1].shape)
 model = model(input_shape = X_train[0].shape)
 
 model.summary()
 opt = Adam(lr=0.005, beta_1=0.9, beta_2=0.999, decay=0)
 model.compile(loss='binary_crossentropy', optimizer=opt, metrics=["accuracy"])
 
-model.fit(X_train, Y_train, batch_size = 64, epochs=60)
-#m,n_h,n_w=X_test.shape
-#X_test = X_test.reshape(m,n_w,n_h)
+model.fit(X_train, Y_train, batch_size = 64, epochs=10)
 loss, acc = model.evaluate(X_test, Y_test)
 print ("Dev set loss = ", loss)
 print("Dev set accuracy = ", acc)

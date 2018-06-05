@@ -1,5 +1,7 @@
 Seqtest.npy
 Seqtrain.npy
+Xtest4_fft.npy
+Xtrain4_fft.npy
 Xtest4.npy
 Xtrain4.npy
 Ytest4.npy
