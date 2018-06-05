@@ -24,7 +24,7 @@ preictalNum = {
 numDogs = 4 #not using dog5 for now because it only has 15 electrodes
 numSlicesOriginal = 6 #number of slices in each hour - 10 min slices
 splitRatio = 20 #split each 10 min into how many pieces
-dataAugmentationStep = 2
+dataAugmentationStep = 100 #by how many hz (use 400 hz for 1 sec) do you want to jump when slicing data?
 
 totalPositiveExamples = 0
 
