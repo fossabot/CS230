@@ -32,7 +32,7 @@ def model(input_shape):
     X = Conv1D(32, 12, strides=6)(X_input)                               # CONV1D
     X = BatchNormalization()(X)                          # Batch normalization
     # X = Activation('relu')(X)                                 # ReLu activation
-    X = Dropout(0.8)(X)                                 # dropout (use 0.8)
+    X = Dropout(0.7)(X)                                 # dropout (use 0.8)
 
     # Step 2: First GRU Layer (≈4 lines)
     X = LSTM(units = 64, return_sequences = True)(X)                            # GRU (use 128 units and return the sequences)
