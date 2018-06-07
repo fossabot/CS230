@@ -32,7 +32,7 @@ def model(input_shape):
     X = Conv1D(32, 12, strides=6)(X_input)                               # CONV1D
     X = BatchNormalization()(X)                          # Batch normalization
     # X = Activation('relu')(X)                                 # ReLu activation
-    X = Dropout(0.7)(X)                                 # dropout (use 0.8)
+    #X = Dropout(0.7)(X)                                 # dropout (use 0.8)
 
     # Step 2: First GRU Layer (≈4 lines)
     X = LSTM(units = 64, return_sequences = True)(X)                            # GRU (use 128 units and return the sequences)
@@ -43,7 +43,7 @@ def model(input_shape):
     X = LSTM(units = 128, return_sequences = False)(X)                       # GRU (use 128 units and return the sequences)
     #X = Dropout(0.8)(X)                    # dropout (use 0.8)
     #X = BatchNormalization()(X)                                 # Batch normalization
-    #X = Dropout(0.8)(X)                                 # dropout (use 0.8)
+    X = Dropout(0.7)(X)                                 # dropout (use 0.8)
 
     # Step 4: Time-distributed dense layer (≈1 line)
     X = Dense(1, activation = "sigmoid")(X) # time distributed  (sigmoid)
@@ -68,10 +68,10 @@ print(X_train[1].shape)
 model = model(input_shape = X_train[0].shape)
 
 model.summary()
-opt = Adam(lr=0.005, beta_1=0.9, beta_2=0.999, decay=0)
+opt = Adam(lr=0.005, beta_1=0.9, beta_2=0.999, decay=0.001)
 model.compile(loss='binary_crossentropy', optimizer=opt, metrics=["accuracy"])
 
-model.fit(X_train, Y_train, batch_size = 64, epochs=60)
+model.fit(X_train, Y_train, batch_size = 64, epochs=50)
 loss, acc = model.evaluate(X_test, Y_test)
 print ("Dev set loss = ", loss)
 print("Dev set accuracy = ", acc)

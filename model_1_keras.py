@@ -10,9 +10,9 @@ from keras.optimizers import Adam
     ### END CODE HERE ##
 
 def load_dataset():
-    X_train = np.load('Xtrain4.npy')
+    X_train = np.load('Xtrain4_fft.npy')
     Y_train = np.load('Ytrain4.npy')
-    X_test = np.load('Xtest4.npy')
+    X_test = np.load('Xtest4_fft.npy')
     Y_test = np.load('Ytest4.npy')
     return X_train, Y_train, X_test, Y_test
 
@@ -30,11 +30,11 @@ def model(input_shape):
     X_input = Input(shape = input_shape)
     # Step 1: CONV layer (≈4 lines)
     X = Conv1D(10, 100, strides=10)(X_input)                               # CONV1D
-    X = Flatten()(X)
     X = BatchNormalization()(X)                          # Batch normalization
+    X = Flatten()(X)
     # X = Activation('relu')(X)                                 # ReLu activation
-    # X = Dropout(0.8)(X)                                 # dropout (use 0.8)
     X = Dense(2000, activation = "relu")(X)
+    X = Dropout(0.7)(X)                                 # dropout (use 0.8)
     X = Dense(500, activation = "relu")(X)
     X = BatchNormalization()(X)                          # Batch normalization
     X = Dense(100, activation = "relu")(X)
@@ -61,10 +61,10 @@ print(X_train[1].shape)
 model = model(input_shape = X_train[0].shape)
 
 model.summary()
-opt = Adam(lr=0.005, beta_1=0.9, beta_2=0.999, decay=0)
+opt = Adam(lr=0.005, beta_1=0.9, beta_2=0.999, decay=0.001)
 model.compile(loss='binary_crossentropy', optimizer=opt, metrics=["accuracy"])
 
-model.fit(X_train, Y_train, batch_size = 64, epochs=8)
+model.fit(X_train, Y_train, batch_size = 64, epochs=20)
 
 loss, acc = model.evaluate(X_test, Y_test)
 print ("Dev set loss = ", loss)
