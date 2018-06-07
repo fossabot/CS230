@@ -72,7 +72,8 @@ opt = Adam(lr=0.005, beta_1=0.9, beta_2=0.999, decay=0.001)
 model.compile(loss='binary_crossentropy', optimizer=opt, metrics=["accuracy"])
 
 for i in range(50):
+    print("Epoch", i)
     model.fit(X_train, Y_train, batch_size = 64, epochs=1)
     loss, acc = model.evaluate(X_test, Y_test)
-print ("Dev set loss = ", loss)
-print("Dev set accuracy = ", acc)
+    print ("Dev set loss = ", loss)
+    print("Dev set accuracy = ", acc)

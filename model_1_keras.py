@@ -40,6 +40,8 @@ def model(input_shape):
     X = BatchNormalization()(X)                          # Batch normalization
     X = Dropout(0.7)(X)
     X = Dense(100, activation = "relu")(X)
+    X = BatchNormalization()(X)                          # Batch normalization
+    X = Dropout(0.7)(X)
     X = Dense(1, activation = "sigmoid")(X)
     #X = Dropout(0.8)(X)                                 # dropout (use 0.8)
 
@@ -66,8 +68,14 @@ model.summary()
 opt = Adam(lr=0.005, beta_1=0.9, beta_2=0.999, decay=0.001)
 model.compile(loss='binary_crossentropy', optimizer=opt, metrics=["accuracy"])
 
-model.fit(X_train, Y_train, batch_size = 64, epochs=20)
-
+model.fit(X_train, Y_train, batch_size = 64, epochs=1)
 loss, acc = model.evaluate(X_test, Y_test)
 print ("Dev set loss = ", loss)
 print("Dev set accuracy = ", acc)
+
+for i in range(40):
+    print("Epoch", i)
+    model.fit(X_train, Y_train, batch_size = 64, epochs=1)
+    loss, acc = model.evaluate(X_test, Y_test)
+    print ("Dev set loss = ", loss)
+    print("Dev set accuracy = ", acc)
