@@ -29,7 +29,7 @@ def model(input_shape):
 
     X_input = Input(shape = input_shape)
     # Step 1: CONV layer (≈4 lines)
-    X = Conv1D(32, 10, strides=10)(X_input)                               # CONV1D
+    X = Conv1D(16, 10, strides=10)(X_input)                               # CONV1D
     X = BatchNormalization()(X)                          # Batch normalization
     # X = Activation('relu')(X)                                 # ReLu activation
     # X = Dropout(0.8)(X)                                 # dropout (use 0.8)
@@ -42,7 +42,7 @@ def model(input_shape):
     # Step 3: Second GRU Layer (≈4 lines)
     X = LSTM(units = 128, return_sequences = False)(X)                       # GRU (use 128 units and return the sequences)
     #X = BatchNormalization()(X)                                 # Batch normalization
-    X = Dropout(0.8)(X)                                 # dropout (use 0.8)
+    X = Dropout(0.7)(X)                                 # dropout (use 0.8)
 
     # Step 4: Time-distributed dense layer (≈1 line)
     X = Dense(1, activation = "sigmoid")(X) # time distributed  (sigmoid)
@@ -69,7 +69,8 @@ model.summary()
 opt = Adam(lr=0.005, beta_1=0.9, beta_2=0.999, decay=0.001)
 model.compile(loss='binary_crossentropy', optimizer=opt, metrics=["accuracy"])
 
-model.fit(X_train, Y_train, batch_size = 64, epochs=30)
-loss, acc = model.evaluate(X_test, Y_test)
+for i in range(30):
+    model.fit(X_train, Y_train, batch_size = 64, epochs=1)
+    loss, acc = model.evaluate(X_test, Y_test)
 print ("Dev set loss = ", loss)
 print("Dev set accuracy = ", acc)
