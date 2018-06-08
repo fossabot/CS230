@@ -1,14 +1,18 @@
+# -*- coding: utf-8 -*-
 #75/66
 
-# -*- coding: utf-8 -*-
 import numpy as np
 #import tensorflow as tf
 import math
+import sklearn
 from keras.callbacks import ModelCheckpoint
 from keras.models import Model, load_model, Sequential
 from keras.layers import Dense, Activation, Dropout, Input, Masking, TimeDistributed, LSTM, Conv2D, Conv1D
 from keras.layers import GRU, Bidirectional, BatchNormalization, Reshape
 from keras.optimizers import Adam
+#from keras.utils.np_utils import predict_proba
+#from keras import regularizers
+from sklearn.metrics import roc_auc_score
     ### END CODE HERE ##
 
 def load_dataset():
@@ -42,7 +46,7 @@ def model(input_shape):
     #X = Dropout(0.8)(X)                               # dropout (use 0.8)
 
     # Step 3: Second GRU Layer (≈4 lines)
-    X = LSTM(units = 128, return_sequences = False)(X)                       # GRU (use 128 units and return the sequences)
+    X = LSTM(units = 64, return_sequences = False)(X)                       # GRU (use 128 units and return the sequences)
     #X = Dropout(0.8)(X)                    # dropout (use 0.8)
     #X = BatchNormalization()(X)                                 # Batch normalization
     X = Dropout(0.7)(X)                                 # dropout (use 0.8)
@@ -72,10 +76,24 @@ model = model(input_shape = X_train[0].shape)
 model.summary()
 opt = Adam(lr=0.005, beta_1=0.9, beta_2=0.999, decay=0.001)
 model.compile(loss='binary_crossentropy', optimizer=opt, metrics=["accuracy"])
+losses = []
+accs=[]
+aurocs=[]
 
 for i in range(50):
     print("Epoch", i)
     model.fit(X_train, Y_train, batch_size = 64, epochs=1)
     loss, acc = model.evaluate(X_test, Y_test)
+    Y_score = model.predict(X_test)
     print ("Dev set loss = ", loss)
+    losses.append(loss)
     print("Dev set accuracy = ", acc)
+    accs.append(acc)
+    auroc=roc_auc_score(Y_test, Y_score)
+    print ("roc_auc_score = ", auroc)
+    aurocs.append(auroc)
+print aurocs #for plotting later
+print accs #for plotting later
+print losses #for plotting
+print ("max_roc_auc_score = ", max(aurocs))
+print ("max_acc = ", max(accs))
