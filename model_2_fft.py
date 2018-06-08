@@ -1,4 +1,4 @@
-#
+#73/64
 
 # -*- coding: utf-8 -*-
 import numpy as np
@@ -34,7 +34,7 @@ def model(input_shape):
     X = Conv1D(16, 10, strides=10)(X_input)                               # CONV1D
     X = BatchNormalization()(X)                          # Batch normalization
     # X = Activation('relu')(X)                                 # ReLu activation
-    X = Dropout(0.3)(X)                                 # dropout (use 0.8)
+    X = Dropout(0.5)(X)                                 # dropout (use 0.8)
 
     # Step 2: First GRU Layer (≈4 lines)
     X = LSTM(units = 64, return_sequences = True)(X)                            # GRU (use 128 units and return the sequences)
@@ -71,9 +71,32 @@ model.summary()
 opt = Adam(lr=0.005, beta_1=0.9, beta_2=0.999, decay=0.001)
 model.compile(loss='binary_crossentropy', optimizer=opt, metrics=["accuracy"])
 
-for i in range(30):
+train_losses = []
+train_accs = []
+dev_losses = []
+dev_accs=[]
+dev_aurocs=[]
+
+for i in range(50):
     print("Epoch", i)
-    model.fit(X_train, Y_train, batch_size = 64, epochs=1)
+    history = model.fit(X_train, Y_train, batch_size = 64, epochs=1)
     loss, acc = model.evaluate(X_test, Y_test)
+    Y_score = model.predict(X_test)
     print ("Dev set loss = ", loss)
+    dev_losses.append(loss)
     print("Dev set accuracy = ", acc)
+    dev_accs.append(acc)
+    auroc=roc_auc_score(Y_test, Y_score)
+    print ("roc_auc_score = ", auroc)
+    aurocs.append(auroc)
+    train_losses.append(history.history['loss'])
+    train_acc.append(history.history['acc'])
+
+stats = {}
+stats['train_losses'] = train_losses
+stats['train_accs'] = train_accs
+stats['dev_losses'] = dev_losses
+stats['dev_accs'] = dev_accs
+stats['dev_aurocs'] = dev_aurocs
+
+np.save('model_2_fft_stats.npy', stats)
