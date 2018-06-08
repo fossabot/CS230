@@ -96,7 +96,7 @@ for i in range(50):
     print ("roc_auc_score = ", auroc)
     dev_aurocs.append(auroc)
     train_losses.append(history.history['loss'])
-    train_acc.append(history.history['acc'])
+    train_accs.append(history.history['acc'])
 
 stats = {}
 stats['train_losses'] = train_losses
