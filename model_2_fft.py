@@ -9,6 +9,8 @@ from keras.models import Model, load_model, Sequential
 from keras.layers import Dense, Activation, Dropout, Input, Masking, TimeDistributed, LSTM, Conv2D, Conv1D
 from keras.layers import GRU, Bidirectional, BatchNormalization, Reshape
 from keras.optimizers import Adam
+from sklearn.metrics import roc_auc_score
+
     ### END CODE HERE ##
 
 def load_dataset():
