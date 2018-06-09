@@ -39,12 +39,12 @@ def model(input_shape):
     #X = Dropout(0.5)(X)                                 # dropout (use 0.8)
 
     # Step 2: First GRU Layer (≈4 lines)
-    X = LSTM(units = 64, return_sequences = True)(X)                            # GRU (use 128 units and return the sequences)
+    X = LSTM(units = 48, return_sequences = True)(X)                            # GRU (use 128 units and return the sequences)
     X = BatchNormalization()(X)                                 # Batch normalization
     #X = Dropout(0.3)(X)                               # dropout (use 0.8)
 
     # Step 3: Second GRU Layer (≈4 lines)
-    X = LSTM(units = 128, return_sequences = False)(X)                       # GRU (use 128 units and return the sequences)
+    X = LSTM(units = 80, return_sequences = False)(X)                       # GRU (use 128 units and return the sequences)
     #X = BatchNormalization()(X)                                 # Batch normalization
     X = Dropout(0.5)(X)                                 # dropout (use 0.8)
 
