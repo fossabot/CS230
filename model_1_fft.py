@@ -1,4 +1,4 @@
-#90/67
+#83/64
 
 # -*- coding: utf-8 -*-
 import numpy as np
@@ -33,19 +33,20 @@ def model(input_shape):
 
     X_input = Input(shape = input_shape)
     # Step 1: CONV layer (≈4 lines)
-    X = Conv1D(10, 100, strides=10)(X_input)                               # CONV1D
+    X = Conv1D(10, 100, strides=25)(X_input)                               # CONV1D
     X = BatchNormalization()(X)                          # Batch normalization
     X = Flatten()(X)
-    X = Dropout(0.8)(X)
+    X = Dropout(0.7)(X)
     # X = Activation('relu')(X)                                 # ReLu activation
-    X = Dense(2000, activation = "relu")(X)
-    X = Dropout(0.8)(X)                                 # dropout (use 0.8)
-    X = Dense(500, activation = "relu")(X)
+    X = Dense(1000, activation = "relu")(X)
+    X = BatchNormalization()(X)
+    X = Dropout(0.7)(X)                                 # dropout (use 0.8)
+    X = Dense(200, activation = "relu")(X)
     X = BatchNormalization()(X)                          # Batch normalization
-    X = Dropout(0.8)(X)
+    X = Dropout(0.7)(X)
     X = Dense(100, activation = "relu")(X)
     X = BatchNormalization()(X)                          # Batch normalization
-    X = Dropout(0.8)(X)
+    X = Dropout(0.4)(X)
     X = Dense(1, activation = "sigmoid")(X)
     #X = Dropout(0.8)(X)                                 # dropout (use 0.8)
 

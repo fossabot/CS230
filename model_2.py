@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-#75/66
+#93/67
 
 import numpy as np
 #import tensorflow as tf
