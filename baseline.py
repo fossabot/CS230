@@ -1,4 +1,3 @@
-## NEED TO CHECK SHAPES OF NEW INPUT OBJECTS (DOG 4 DATA)
 
 import numpy as np
 import tensorflow as tf
@@ -6,10 +5,10 @@ import math
 from tensorflow.python.framework import ops
 
 def load_dataset():
-    X_train = np.load('Xtrain4.npy')
-    Y_train = np.load('Ytrain4.npy')
-    X_test = np.load('Xtest4.npy')
-    Y_test = np.load('Ytest4.npy')
+    X_train = np.load('Xtrain.npy')
+    Y_train = np.load('Ytrain.npy')
+    X_test = np.load('Xtest.npy')
+    Y_test = np.load('Ytest.npy')
     return X_train, Y_train, X_test, Y_test
 
 def create_placeholders(n_H0, n_W0, n_y, n_C):
@@ -73,7 +72,7 @@ def forward_propagation(X, parameters):
     A3 = tf.contrib.layers.fully_connected(A2, 500)
     A4 = tf.contrib.layers.fully_connected(A3, 100)
     A5 = tf.contrib.layers.fully_connected(A4, 20)
-    Z5 = tf.contrib.layers.fully_connected(A5, 1, activation_fn=None)
+    Z5 = tf.contrib.layers.fully_connected(A5, 1, activation_fn=None) #sigmoid done in calculation of loss
 
     return Z5
 

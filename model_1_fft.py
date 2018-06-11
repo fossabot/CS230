@@ -1,8 +1,4 @@
-#83/64
-
-# -*- coding: utf-8 -*-
 import numpy as np
-#import tensorflow as tf
 import math
 from keras.callbacks import ModelCheckpoint
 from keras.models import Model, load_model, Sequential
@@ -10,8 +6,6 @@ from keras.layers import Dense, Activation, Dropout, Input, Masking, TimeDistrib
 from keras.layers import GRU, Bidirectional, BatchNormalization, Reshape
 from keras.optimizers import Adam
 from sklearn.metrics import roc_auc_score
-
-    ### END CODE HERE ##
 
 def load_dataset():
     X_train = np.load('Xtrain4_fft.npy')
@@ -32,25 +26,20 @@ def model(input_shape):
     """
 
     X_input = Input(shape = input_shape)
-    # Step 1: CONV layer (≈4 lines)
-    X = Conv1D(10, 100, strides=25)(X_input)                               # CONV1D
-    X = BatchNormalization()(X)                          # Batch normalization
+    X = Conv1D(10, 100, strides=25)(X_input)
+    X = BatchNormalization()(X)
     X = Flatten()(X)
     X = Dropout(0.7)(X)
-    # X = Activation('relu')(X)                                 # ReLu activation
     X = Dense(1000, activation = "relu")(X)
     X = BatchNormalization()(X)
-    X = Dropout(0.7)(X)                                 # dropout (use 0.8)
+    X = Dropout(0.7)(X)
     X = Dense(200, activation = "relu")(X)
-    X = BatchNormalization()(X)                          # Batch normalization
+    X = BatchNormalization()(X)
     X = Dropout(0.7)(X)
     X = Dense(100, activation = "relu")(X)
-    X = BatchNormalization()(X)                          # Batch normalization
+    X = BatchNormalization()(X)
     X = Dropout(0.4)(X)
     X = Dense(1, activation = "sigmoid")(X)
-    #X = Dropout(0.8)(X)                                 # dropout (use 0.8)
-
-    ### END CODE HERE ###
 
     model = Model(inputs = X_input, outputs = X)
 
@@ -63,9 +52,6 @@ m,n_h,n_w=X_train.shape
 permutation = list(np.random.permutation(m))
 X_train = X_train[permutation,:]
 Y_train = Y_train[permutation,:]
-
-print(Y_train)
-print(X_train[1].shape)
 
 model = model(input_shape = X_train[0].shape)
 

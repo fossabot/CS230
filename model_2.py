@@ -1,7 +1,4 @@
-#93/67
-
 import numpy as np
-#import tensorflow as tf
 import math
 import sklearn
 from keras.callbacks import ModelCheckpoint
@@ -9,10 +6,9 @@ from keras.models import Model, load_model, Sequential
 from keras.layers import Dense, Activation, Dropout, Input, Masking, TimeDistributed, LSTM, Conv2D, Conv1D
 from keras.layers import GRU, Bidirectional, BatchNormalization, Reshape
 from keras.optimizers import Adam
-#from keras.utils.np_utils import predict_proba
-#from keras import regularizers
 from sklearn.metrics import roc_auc_score
-    ### END CODE HERE ##
+import matplotlib.pyplot as plt
+import csv
 
 def load_dataset():
     X_train = np.load('Xtrain4.npy')
@@ -33,28 +29,20 @@ def model(input_shape):
     """
 
     X_input = Input(shape = input_shape)
-    # Step 1: CONV layer (≈4 lines)
-    X = Conv1D(32, 12, strides=6)(X_input)                               # CONV1D
-    X = BatchNormalization()(X)                          # Batch normalization
-    # X = Activation('relu')(X)                                 # ReLu activation
-    #X = Dropout(0.7)(X)                                 # dropout (use 0.8)
+    # Step 1: CONV layer
+    X = Conv1D(32, 12, strides=6)(X_input)
+    X = BatchNormalization()(X)
 
-    # Step 2: First GRU Layer (≈4 lines)
-    X = LSTM(units = 48, return_sequences = True)(X)                            # GRU (use 128 units and return the sequences)
-    X = BatchNormalization()(X)                                 # Batch normalization
-    #X = Dropout(0.8)(X)                               # dropout (use 0.8)
+    # Step 2: First LSTM Layer
+    X = LSTM(units = 48, return_sequences = True)(X)
+    X = BatchNormalization()(X)
 
-    # Step 3: Second GRU Layer (≈4 lines)
-    X = LSTM(units = 80, return_sequences = False)(X)                       # GRU (use 128 units and return the sequences)
-    #X = Dropout(0.8)(X)                    # dropout (use 0.8)
-    #X = BatchNormalization()(X)                                 # Batch normalization
-    X = Dropout(0.7)(X)                                 # dropout (use 0.8)
+    # Step 3: Second LSTM Layer
+    X = LSTM(units = 80, return_sequences = False)(X)
+    X = Dropout(0.7)(X)
 
-    # Step 4: Time-distributed dense layer (≈1 line)
-    X = Dense(1, activation = "sigmoid")(X) # time distributed  (sigmoid)
-    #X = Dropout(0.8)(X)                                 # dropout (use 0.8)
-
-    ### END CODE HERE ###
+    # Step 4: Dense layer
+    X = Dense(1, activation = "sigmoid")(X)
 
     model = Model(inputs = X_input, outputs = X)
 
@@ -62,18 +50,16 @@ def model(input_shape):
 
 X_train, Y_train, X_test, Y_test = load_dataset()
 
-print(X_train)
 m,n_h,n_w=X_train.shape
 
 permutation = list(np.random.permutation(m))
 X_train = X_train[permutation,:]
 Y_train = Y_train[permutation,:]
-print(Y_train)
-print(X_train[1].shape)
+
 model = model(input_shape = X_train[0].shape)
 
 model.summary()
-opt = Adam(lr=0.005, beta_1=0.9, beta_2=0.999, decay=0.001)
+opt = Adam(lr=0.005, beta_1=0.9, beta_2=0.999, decay=0.001) #hyperparameters
 model.compile(loss='binary_crossentropy', optimizer=opt, metrics=["accuracy"])
 
 train_losses = []
@@ -96,6 +82,26 @@ for i in range(50):
     dev_aurocs.append(auroc)
     train_losses.append(history.history['loss'])
     train_accs.append(history.history['acc'])
+
+    Y_Pred = []
+    for y in Y_score:
+        if y> 0.5:
+            Y_Pred.append(1)
+        else:
+            Y_Pred.append(0)
+    false_positive_rate, true_positive_rate, thresholds=roc_curve(Y_test, Y_score)
+    roc_auc = auc(false_positive_rate, true_positive_rate)
+    plt.title('Receiver Operating Characteristic Curve')
+    plt.plot(false_positive_rate, true_positive_rate, 'b', label='AUC = %0.2f'% roc_auc)
+    plt.legend(loc='lower right')
+    plt.plot([0,1],[0,1],'r--')
+    plt.xlim([-0.1,1.2])
+    plt.ylim([-0.1,1.2])
+    plt.ylabel('True Positive Rate')
+    plt.xlabel('False Positive Rate')
+    plt.savefig('roc_curve_'+str(i)+'.png')
+    plt.clf()
+    print confusion_matrix(Y_test,Y_Pred)
 
 stats = {}
 stats['train_losses'] = train_losses
